@@ -28,7 +28,18 @@
 .my-button:hover {
   background-color: #008CBA;
   color: white;
+  transition: 0.25s ease-in-out;
 }    
+
+
+.large {
+  font-size: 32px;
+}
+
+
+.flipped {
+  transform: scaleX(-1)
+}
   </style>
 
   <script type="text/javascript">
@@ -38,30 +49,83 @@
       window.onload = () => {
         const dirButton = document.getElementById('dir-button')
         const textArea = document.getElementById('main-textarea')
+        const newButton = document.getElementById('new')
+        const prevButton = document.getElementById('prev')
+        const nextButton = document.getElementById('next')
 
-        function update() {
+        const state = loadState()
+
+        function update(full) {
           textArea.setAttribute('dir', dirIsRtl ? 'RTL' : 'LTR')
-          dirButton.innerHTML = dirIsRtl ? '<=' : '=>'
+          if (dirIsRtl) {
+            dirButton.classList.add('flipped')
+          } else {            
+            dirButton.classList.remove('flipped')
+          }
+
+          if (full) {
+            textArea.value = state.index >= 0 ? state.texts[state.index] : ''
+          }
         }
 
         dirButton.addEventListener("click", () => {
           dirIsRtl = !dirIsRtl
-          update()
+          update(false)
+        })
+
+        newButton.addEventListener('click', () => {
+          state.texts.push('')
+          state.index = state.texts.length - 1
+          update(true)
+        })
+
+        prevButton.addEventListener('click', () => {
+          state.index = Math.max(state.index - 1, 0)
+          update(true)
+        })
+
+        nextButton.addEventListener('click', () => {
+          state.index = Math.min(state.index + 1, state.texts.length - 1)
+          update(true)
         })
 
         textArea.addEventListener('input', () => {
-          localStorage.setItem('textAreaValue', textArea.value)
+          state.texts[state.index] = textArea.value
         })
 
-        update()
-        textArea.value = localStorage.getItem('textAreaValue')
+        function loadState() {
+          const unparsed = localStorage.getItem('state')
+          const defaultState = {texts: [''], index: 0 }
+          if (!unparsed) {
+            return defaultState
+          }
+
+          const ret = JSON.parse(unparsed)
+          if (ret.index < 0) {
+            return defaultState
+          }
+
+          return ret
+        }
+
+        function storeState() {
+          state.texts[state.index] = textArea.value
+          localStorage.setItem('state', JSON.stringify(state))
+        }
+
+        addEventListener('beforeunload', event => { storeState() }, {capture: true});
+        update(true)
       } 
     })()
   </script>
 </head>
 
 <body>
-  <div id="dir-button" class="my-button"></div>
+  <!-- ➼ -->
+  <span id="dir-button" class="my-button">&Rightarrow;</span>
+  <span id="new" class="my-button">New</span>
+  <span id="prev" class="my-button">Prev</span>
+  <span id="next" class="my-button">Next</span>
   <textarea id="main-textarea" style="width: 100%; height: 90%;"></textarea>
 </body>
 </html>
