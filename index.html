@@ -40,7 +40,11 @@
       transition: 0.25s ease-in-out;
     }
 
-    .purge {
+    .danger {
+      border: 2px solid #f44336;
+    }
+
+    .danger:hover {
       background-color: #f44336;
     }
 
@@ -59,9 +63,23 @@
     }
 
     .list-of-notes-item {
+      display: list-item;
       overflow-x: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;      
+      white-space: nowrap;
+      margin-top: 1em;      
+    }
+
+    .search {
+      padding: 1em;
+      border-radius: 5px;
+      font-size: 1em 2em;
+      width: 100%;
+      font-size: 1em;
+    }
+
+    #query-input {
+      height: 2em;
     }
   </style>
 
@@ -77,6 +95,7 @@
         const indicatorCurr = document.getElementById('indicator-curr')
         const indicatorOutOf = document.getElementById('indicator-out-of')
         const listOfNotes = document.getElementById('list-of-notes')
+        const queryInput = document.getElementById('query-input')
         const state = loadState()
 
 
@@ -90,26 +109,44 @@
 
         let currentListFingerprint = ''
 
+
+        function toWords(s) {
+          return s.toLowerCase().split(' ').map(s => s.trim()).filter(Boolean)
+        }
+
+        function computeMatch(text) {
+          if (!state.query) {
+            return 1
+          }
+
+          const queryWords = toWords(state.query)
+          const textWords = new Set(toWords(text))
+
+          const foundWords = queryWords.filter(qw => textWords.has(qw))
+
+          return foundWords.length / queryWords.length
+        }
+
         function updateListOfNotes() {
-          const oneLiners = state.notes.map(at => at.text.trim().split('\n')[0].trim().slice(0, 40))
-          const fp = JSON.stringify(oneLiners)
+          const records = state.notes.map((entry, i) => ({i, entry, rank: computeMatch(entry.text), oneLiner: entry.text.trim().split('\n')[0].trim().slice(0, 40)}))
+          const sorted = records.sort((lhs, rhs) => rhs.rank - lhs.rank)
+          const filtered = sorted.filter(curr => curr.rank > 0)
+
+          const fp = JSON.stringify(filtered)
           if (fp === currentListFingerprint) {
             return
           }
           listOfNotes.innerText = ''
-          oneLiners.forEach((curr, i) => {
+          filtered.forEach(curr => {
             const a = document.createElement('a')
-            a.setAttribute('href', `#${i}`)
-            a.textContent = curr || 'EMPTY'
-            const n = i
+            a.setAttribute('href', `#${curr.i}`)
+            a.textContent = curr.oneLiner || 'EMPTY'
+            a.classList.add('list-of-notes-item')
             a.addEventListener('click', () => {
-              state.index = i
+              state.index = curr.i
               update(true)
             })
-            const li = document.createElement('li')
-            li.classList.add('list-of-notes-item')
-            li.appendChild(a)
-            listOfNotes.appendChild(li)
+            listOfNotes.appendChild(a)
           })
           currentListFingerprint = fp
         }
@@ -124,7 +161,7 @@
           indicatorOutOf.innerText = String(state.notes.length)
 
           updateListOfNotes()
-          dirButton.innerHTML = `RTL ${note.rtl ? '&mapstoleft;' : '&RightTeeArrow;'}`
+          dirButton.innerText = `RTL ${note.rtl ? '↤' : '↦'}`
           if (full) {
             textArea.value = note.text
           }
@@ -167,6 +204,11 @@
           updateListOfNotes()
         })
 
+        queryInput.addEventListener('input', () => {
+          state.query = queryInput.value
+          update(false)
+        })
+
 
         function loadState() {
           const unparsed = localStorage.getItem('state')
@@ -187,6 +229,7 @@
           }
 
           ret.version = defaultState.version
+          ret.query = ret.query ?? ''
           return ret
         }
 
@@ -204,8 +247,8 @@
 
 <body>
   <div class="list-container">
-    <ul id="list-of-notes">
-    </ul>
+    <div class="search"><input type="text" id="query-input">&#x1f50e;</div>
+    <div id="list-of-notes"></div>
   </div>
   <div class="editor-container">
     <span id="dir-button" class="my-button">RTL</span>
@@ -218,6 +261,7 @@
         style="text-align:left"></span>
     </span>
     <span id="next" class="my-button">&#x2C3;</span>
+    <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
     <span id="purge" class="my-button danger">Purge</span>
 
     <textarea id="main-textarea" style="width: 100%; height: 90%;"></textarea>
