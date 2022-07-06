@@ -3,43 +3,43 @@
 <head>
   <style>
     body {
-      font-family: Arial, Helvetica, sans-serif;      
+      font-family: Arial, Helvetica, sans-serif;
     }
+
     textarea {
       margin-top: 1em;
     }
+
+    .text-box {
+      padding: 1em 1em;
+    }
+
     .my-button {
       border: none;
       border-radius: 5px;
       color: white;
       display: inline-block;
-      font-size: 16px;      
-      padding: 15px 32px;
+      font-size: 16px;
+      padding: 1em 2em;
       text-align: center;
       text-decoration: none;
     }
 
     .my-button {
-  background-color: white; 
-  color: black; 
-  border: 2px solid #008CBA;
-}
+      background-color: white;
+      color: black;
+      border: 2px solid #008CBA;
+    }
 
-.my-button:hover {
-  background-color: #008CBA;
-  color: white;
-  transition: 0.25s ease-in-out;
-}    
+    .my-button:hover {
+      background-color: #008CBA;
+      color: white;
+      transition: 0.25s ease-in-out;
+    }
 
-
-.large {
-  font-size: 32px;
-}
-
-
-.flipped {
-  transform: scaleX(-1)
-}
+    .flipped {
+      transform: scaleX(-1)
+    }
   </style>
 
   <script type="text/javascript">
@@ -52,6 +52,7 @@
         const newButton = document.getElementById('new')
         const prevButton = document.getElementById('prev')
         const nextButton = document.getElementById('next')
+        const indicator = document.getElementById('indicator')
 
         const state = loadState()
 
@@ -59,9 +60,11 @@
           textArea.setAttribute('dir', dirIsRtl ? 'RTL' : 'LTR')
           if (dirIsRtl) {
             dirButton.classList.add('flipped')
-          } else {            
+          } else {
             dirButton.classList.remove('flipped')
           }
+
+          indicator.innerText = `${state.index + 1}/${state.texts.length}`
 
           if (full) {
             textArea.value = state.index >= 0 ? state.texts[state.index] : ''
@@ -95,7 +98,7 @@
 
         function loadState() {
           const unparsed = localStorage.getItem('state')
-          const defaultState = {texts: [''], index: 0 }
+          const defaultState = { texts: [''], index: 0 }
           if (!unparsed) {
             return defaultState
           }
@@ -113,9 +116,9 @@
           localStorage.setItem('state', JSON.stringify(state))
         }
 
-        addEventListener('beforeunload', event => { storeState() }, {capture: true});
+        addEventListener('beforeunload', event => { storeState() }, { capture: true });
         update(true)
-      } 
+      }
     })()
   </script>
 </head>
@@ -124,8 +127,11 @@
   <!-- ➼ -->
   <span id="dir-button" class="my-button">&Rightarrow;</span>
   <span id="new" class="my-button">New</span>
+  <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
   <span id="prev" class="my-button">Prev</span>
+  <span id="indicator" class="text-box"></span>
   <span id="next" class="my-button">Next</span>
   <textarea id="main-textarea" style="width: 100%; height: 90%;"></textarea>
 </body>
+
 </html>
