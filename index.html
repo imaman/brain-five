@@ -56,14 +56,18 @@
 
         const state = loadState()
 
+
+        function applyClass(element, className, doApply) {
+          if (doApply) {
+            element.classList.add(className)
+          } else {
+            element.classList.remove(className)
+          }
+        }
+
         function update(full) {
           textArea.setAttribute('dir', dirIsRtl ? 'RTL' : 'LTR')
-          if (dirIsRtl) {
-            dirButton.classList.add('flipped')
-          } else {
-            dirButton.classList.remove('flipped')
-          }
-
+          applyClass(dirButton, 'flipped', dirIsRtl)
           indicator.innerText = `${state.index + 1}/${state.texts.length}`
 
           if (full) {
