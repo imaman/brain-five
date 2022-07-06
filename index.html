@@ -124,7 +124,7 @@
           indicatorOutOf.innerText = String(state.notes.length)
 
           updateListOfNotes()
-          dirButton.innerHTML = `RTL ${note.rtl ? '&mapstoleft;' : '&RightTeeArrow;'}`
+          dirButton.innerText = `RTL ${note.rtl ? '↤' : '↦'}`
           if (full) {
             textArea.value = note.text
           }
