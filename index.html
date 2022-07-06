@@ -71,14 +71,14 @@
         function update(full) {
           textArea.setAttribute('dir', dirIsRtl ? 'RTL' : 'LTR')
           applyClass(prevButton, 'disabled', state.index === 0)
-          applyClass(nextButton, 'disabled', state.index === state.texts.length - 1)
-          const numDigits = String(state.texts.length).length
+          applyClass(nextButton, 'disabled', state.index === state.notes.length - 1)
+          const numDigits = String(state.notes.length).length
           indicatorCurr.innerText = String(state.index + 1).padStart(numDigits)
-          indicatorOutOf.innerText = String(state.texts.length)
+          indicatorOutOf.innerText = String(state.notes.length)
 
           dirButton.innerHTML = `RTL ${dirIsRtl ? '&mapstoleft;' : '&RightTeeArrow;'}`
           if (full) {
-            textArea.value = state.index >= 0 ? state.texts[state.index] : ''
+            textArea.value = state.index >= 0 ? state.notes[state.index].text : ''
           }
         }
 
@@ -88,8 +88,8 @@
         })
 
         newButton.addEventListener('click', () => {
-          state.texts.push('')
-          state.index = state.texts.length - 1
+          state.notes.push({text: '', rtl: false})
+          state.index = state.notes.length - 1
           update(true)
         })
 
@@ -99,17 +99,17 @@
         })
 
         nextButton.addEventListener('click', () => {
-          state.index = Math.min(state.index + 1, state.texts.length - 1)
+          state.index = Math.min(state.index + 1, state.notes.length - 1)
           update(true)
         })
 
         textArea.addEventListener('input', () => {
-          state.texts[state.index] = textArea.value
+          state.notes[state.index].text = textArea.value
         })
 
         function loadState() {
           const unparsed = localStorage.getItem('state')
-          const defaultState = { texts: [''], index: 0 }
+          const defaultState = { version: 2, notes: [{text: '', rtl: false}], index: 0 }
           if (!unparsed) {
             return defaultState
           }
@@ -119,11 +119,18 @@
             return defaultState
           }
 
+          ret.version = ret.version ?? 0
+          if (ret.version === 0 && ret.texts) {
+            ret.notes = ret.texts.map(at => ({text: at, rtl: false}))
+            delete ret.texts
+          }
+
+          ret.version = defaultState.version
           return ret
         }
 
         function storeState() {
-          state.texts[state.index] = textArea.value
+          state.notes[state.index].text = textArea.value
           localStorage.setItem('state', JSON.stringify(state))
         }
 
