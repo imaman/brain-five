@@ -10,6 +10,7 @@
 
     textarea {
       margin-top: 1em;
+      font-size: 2em;
     }
 
     .text-box {
@@ -177,6 +178,7 @@
           state.notes.push({ text: '', rtl: false })
           state.index = state.notes.length - 1
           update(true)
+          textArea.focus()
         })
 
         prevButton.addEventListener('click', () => {
