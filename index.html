@@ -62,10 +62,18 @@
       margin-left: 1em;
     }
 
+    .li-like {
+      display: list-item;          /* This has to be "list-item"                                               */
+      list-style-type: square;     /* See https://developer.mozilla.org/en-US/docs/Web/CSS/list-style-type     */
+      list-style-position: inside; 
+    }
+
     .list-of-notes-item {
+      display: list-item;
       overflow-x: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;      
+      white-space: nowrap;
+      margin-top: 1em;      
     }
   </style>
 
@@ -105,15 +113,13 @@
             const a = document.createElement('a')
             a.setAttribute('href', `#${i}`)
             a.textContent = curr || 'EMPTY'
+            a.classList.add('list-of-notes-item')
             const n = i
             a.addEventListener('click', () => {
               state.index = i
               update(true)
             })
-            const li = document.createElement('li')
-            li.classList.add('list-of-notes-item')
-            li.appendChild(a)
-            listOfNotes.appendChild(li)
+            listOfNotes.appendChild(a)
           })
           currentListFingerprint = fp
         }
@@ -207,9 +213,7 @@
 </head>
 
 <body>
-  <div class="list-container">
-    <ul id="list-of-notes">
-    </ul>
+  <div id="list-of-notes" class="list-container">
   </div>
   <div class="editor-container">
     <span id="dir-button" class="my-button">RTL</span>
