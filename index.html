@@ -17,6 +17,13 @@
       font-family: 'Courier New', Courier, monospace;
     }
 
+    .search {
+      padding: 1em;
+      border-radius: 5px;
+      font-size: 1em 2em;
+      width: 100%;
+    }
+
     .my-button {
       border: none;
       border-radius: 5px;
@@ -62,12 +69,6 @@
       margin-left: 1em;
     }
 
-    .li-like {
-      display: list-item;          /* This has to be "list-item"                                               */
-      list-style-type: square;     /* See https://developer.mozilla.org/en-US/docs/Web/CSS/list-style-type     */
-      list-style-position: inside; 
-    }
-
     .list-of-notes-item {
       display: list-item;
       overflow-x: hidden;
@@ -89,6 +90,7 @@
         const indicatorCurr = document.getElementById('indicator-curr')
         const indicatorOutOf = document.getElementById('indicator-out-of')
         const listOfNotes = document.getElementById('list-of-notes')
+        const queryInput = document.getElementById('query-input')
         const state = loadState()
 
 
@@ -102,21 +104,41 @@
 
         let currentListFingerprint = ''
 
+
+        function toWords(s) {
+          return s.split(' ').map(s => s.trim()).filter(Boolean)
+        }
+
+        function computeMatch(text) {
+          if (!state.query) {
+            return 1
+          }
+
+          const queryWords = toWords(state.query)
+          const textWords = new Set(toWords(text))
+
+          const foundWords = queryWords.filter(qw => textWords.has(qw))
+
+          return foundWords.length / queryWords.length
+        }
+
         function updateListOfNotes() {
-          const oneLiners = state.notes.map(at => at.text.trim().split('\n')[0].trim().slice(0, 40))
-          const fp = JSON.stringify(oneLiners)
+          const records = state.notes.map((entry, i) => ({i, entry, rank: computeMatch(entry.text), oneLiner: entry.text.trim().split('\n')[0].trim().slice(0, 40)}))
+          const sorted = records.sort((lhs, rhs) => rhs.rank - lhs.rank)
+          const filtered = sorted.filter(curr => curr.rank > 0)
+
+          const fp = JSON.stringify(filtered)
           if (fp === currentListFingerprint) {
             return
           }
           listOfNotes.innerText = ''
-          oneLiners.forEach((curr, i) => {
+          filtered.forEach(curr => {
             const a = document.createElement('a')
-            a.setAttribute('href', `#${i}`)
-            a.textContent = curr || 'EMPTY'
+            a.setAttribute('href', `#${curr.i}`)
+            a.textContent = curr.oneLiner || 'EMPTY'
             a.classList.add('list-of-notes-item')
-            const n = i
             a.addEventListener('click', () => {
-              state.index = i
+              state.index = curr.i
               update(true)
             })
             listOfNotes.appendChild(a)
@@ -177,6 +199,11 @@
           updateListOfNotes()
         })
 
+        queryInput.addEventListener('input', () => {
+          state.query = queryInput.value
+          update(false)
+        })
+
 
         function loadState() {
           const unparsed = localStorage.getItem('state')
@@ -197,6 +224,7 @@
           }
 
           ret.version = defaultState.version
+          ret.query = ret.query ?? ''
           return ret
         }
 
@@ -213,7 +241,9 @@
 </head>
 
 <body>
-  <div id="list-of-notes" class="list-container">
+  <div class="list-container">
+    <div class="search"><input type="text" id="query-input">&#x1f50e;</div>
+    <div id="list-of-notes"></div>
   </div>
   <div class="editor-container">
     <span id="dir-button" class="my-button">RTL</span>
