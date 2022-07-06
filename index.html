@@ -54,7 +54,7 @@
         const nextButton = document.getElementById('next')
         const indicatorCurr = document.getElementById('indicator-curr')
         const indicatorOutOf = document.getElementById('indicator-out-of')
-
+        const listOfNotes = document.getElementById('list-of-notes')
         const state = loadState()
 
 
@@ -74,6 +74,9 @@
           const numDigits = String(state.notes.length).length
           indicatorCurr.innerText = String(state.index + 1).padStart(numDigits)
           indicatorOutOf.innerText = String(state.notes.length)
+
+          const oneLiners = state.notes.map(at => at.text.trim().split('\n')[0].trim().slice(0, 40))
+          listOfNotes.innerHTML = oneLiners.map((at,i) => `<li><a href="#${i}">${at || '&lt;EMPTY&gt;'}</a></li>`).join('\n')
 
           dirButton.innerHTML = `RTL ${note.rtl ? '&mapstoleft;' : '&RightTeeArrow;'}`
           if (full) {
@@ -152,6 +155,8 @@
 
   <span id="next" class="my-button">&#x2C3;</span>
   <textarea id="main-textarea" style="width: 100%; height: 90%;"></textarea>
+  <ul id="list-of-notes">
+  </ul>
 </body>
 
 </html>
