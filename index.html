@@ -20,7 +20,7 @@
       border-radius: 5px;
       color: white;
       display: inline-block;
-      font-size: 16px;
+      font-size: 1em;
       padding: 1em 2em;
       text-align: center;
       text-decoration: none;
@@ -41,11 +41,7 @@
     .disabled {
       opacity: 0.6;
       cursor: not-allowed;
-    }      
-
-    .flipped {
-      transform: scaleX(-1)
-    }
+    }  
   </style>
 
   <script type="text/javascript">
@@ -74,13 +70,13 @@
 
         function update(full) {
           textArea.setAttribute('dir', dirIsRtl ? 'RTL' : 'LTR')
-          applyClass(dirButton, 'flipped', dirIsRtl)
           applyClass(prevButton, 'disabled', state.index === 0)
           applyClass(nextButton, 'disabled', state.index === state.texts.length - 1)
           const numDigits = String(state.texts.length).length
           indicatorCurr.innerText = String(state.index + 1).padStart(numDigits)
           indicatorOutOf.innerText = String(state.texts.length)
 
+          dirButton.innerHTML = `RTL ${dirIsRtl ? '&mapstoleft;' : '&RightTeeArrow;'}`
           if (full) {
             textArea.value = state.index >= 0 ? state.texts[state.index] : ''
           }
@@ -139,16 +135,15 @@
 </head>
 
 <body>
-  <!-- ➼ -->
-  <span id="dir-button" class="my-button">&Rightarrow;</span>
+  <span id="dir-button" class="my-button">RTL</span>
   <span id="new" class="my-button">New</span>
   <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
-  <span id="prev" class="my-button">Prev</span>
+  <span id="prev" class="my-button">&#x2C2;</span>
   <span class="text-box">
     <span id="indicator-curr" style="text-align:right; white-space:pre"></span>/<span id="indicator-out-of" style="text-align:left"></span>  
   </span>
 
-  <span id="next" class="my-button">Next</span>
+  <span id="next" class="my-button">&#x2C3;</span>
   <textarea id="main-textarea" style="width: 100%; height: 90%;"></textarea>
 </body>
 
