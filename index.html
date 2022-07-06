@@ -3,43 +3,45 @@
 <head>
   <style>
     body {
-      font-family: Arial, Helvetica, sans-serif;      
+      font-family: Arial, Helvetica, sans-serif;
     }
+
     textarea {
       margin-top: 1em;
     }
+
+    .text-box {
+      padding: 1em 1em;
+      font-family:'Courier New', Courier, monospace;
+    }
+
     .my-button {
       border: none;
       border-radius: 5px;
       color: white;
       display: inline-block;
-      font-size: 16px;      
-      padding: 15px 32px;
+      font-size: 1em;
+      padding: 1em 2em;
       text-align: center;
       text-decoration: none;
     }
 
     .my-button {
-  background-color: white; 
-  color: black; 
-  border: 2px solid #008CBA;
-}
+      background-color: white;
+      color: black;
+      border: 2px solid #008CBA;
+    }
 
-.my-button:hover {
-  background-color: #008CBA;
-  color: white;
-  transition: 0.25s ease-in-out;
-}    
+    .my-button:hover {
+      background-color: #008CBA;
+      color: white;
+      transition: 0.25s ease-in-out;
+    }
 
-
-.large {
-  font-size: 32px;
-}
-
-
-.flipped {
-  transform: scaleX(-1)
-}
+    .disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }  
   </style>
 
   <script type="text/javascript">
@@ -52,17 +54,29 @@
         const newButton = document.getElementById('new')
         const prevButton = document.getElementById('prev')
         const nextButton = document.getElementById('next')
+        const indicatorCurr = document.getElementById('indicator-curr')
+        const indicatorOutOf = document.getElementById('indicator-out-of')
 
         const state = loadState()
 
+
+        function applyClass(element, className, doApply) {
+          if (doApply) {
+            element.classList.add(className)
+          } else {
+            element.classList.remove(className)
+          }
+        }
+
         function update(full) {
           textArea.setAttribute('dir', dirIsRtl ? 'RTL' : 'LTR')
-          if (dirIsRtl) {
-            dirButton.classList.add('flipped')
-          } else {            
-            dirButton.classList.remove('flipped')
-          }
+          applyClass(prevButton, 'disabled', state.index === 0)
+          applyClass(nextButton, 'disabled', state.index === state.texts.length - 1)
+          const numDigits = String(state.texts.length).length
+          indicatorCurr.innerText = String(state.index + 1).padStart(numDigits)
+          indicatorOutOf.innerText = String(state.texts.length)
 
+          dirButton.innerHTML = `RTL ${dirIsRtl ? '&mapstoleft;' : '&RightTeeArrow;'}`
           if (full) {
             textArea.value = state.index >= 0 ? state.texts[state.index] : ''
           }
@@ -95,7 +109,7 @@
 
         function loadState() {
           const unparsed = localStorage.getItem('state')
-          const defaultState = {texts: [''], index: 0 }
+          const defaultState = { texts: [''], index: 0 }
           if (!unparsed) {
             return defaultState
           }
@@ -113,19 +127,24 @@
           localStorage.setItem('state', JSON.stringify(state))
         }
 
-        addEventListener('beforeunload', event => { storeState() }, {capture: true});
+        addEventListener('beforeunload', event => { storeState() }, { capture: true });
         update(true)
-      } 
+      }
     })()
   </script>
 </head>
 
 <body>
-  <!-- ➼ -->
-  <span id="dir-button" class="my-button">&Rightarrow;</span>
+  <span id="dir-button" class="my-button">RTL</span>
   <span id="new" class="my-button">New</span>
-  <span id="prev" class="my-button">Prev</span>
-  <span id="next" class="my-button">Next</span>
+  <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
+  <span id="prev" class="my-button">&#x2C2;</span>
+  <span class="text-box">
+    <span id="indicator-curr" style="text-align:right; white-space:pre"></span>/<span id="indicator-out-of" style="text-align:left"></span>  
+  </span>
+
+  <span id="next" class="my-button">&#x2C3;</span>
   <textarea id="main-textarea" style="width: 100%; height: 90%;"></textarea>
 </body>
+
 </html>
