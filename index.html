@@ -66,19 +66,29 @@
           }
         }
 
+        let currentListFingerprint = ''
+
         function updateListOfNotes() {
           const oneLiners = state.notes.map(at => at.text.trim().split('\n')[0].trim().slice(0, 40))
+          const fp = JSON.stringify(oneLiners)
+          if (fp === currentListFingerprint) {
+            return
+          }
           listOfNotes.innerText = ''
-          let i = -1
-          for (const curr of oneLiners) {
-            ++i
+          oneLiners.forEach((curr, i) => {
             const a = document.createElement('a')
             a.setAttribute('href', `#${i}`)
             a.textContent = curr || 'EMPTY'
+            const n = i
+            a.addEventListener('click', () => {
+              state.index = i
+              update(true)
+            })
             const li = document.createElement('li')
             li.appendChild(a)
             listOfNotes.appendChild(li)
-          }
+          })
+          currentListFingerprint = fp
         }
 
         function update(full) {
@@ -97,7 +107,7 @@
           }
         }
 
-        dirButton.addEventListener("click", () => {
+        dirButton.addEventListener('click', () => {
           const note = state.notes[state.index]
           note.rtl = !note.rtl
           update(false)
