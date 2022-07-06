@@ -17,13 +17,6 @@
       font-family: 'Courier New', Courier, monospace;
     }
 
-    .search {
-      padding: 1em;
-      border-radius: 5px;
-      font-size: 1em 2em;
-      width: 100%;
-    }
-
     .my-button {
       border: none;
       border-radius: 5px;
@@ -76,6 +69,18 @@
       white-space: nowrap;
       margin-top: 1em;      
     }
+
+    .search {
+      padding: 1em;
+      border-radius: 5px;
+      font-size: 1em 2em;
+      width: 100%;
+      font-size: 1em;
+    }
+
+    #query-input {
+      height: 2em;
+    }
   </style>
 
   <script type="text/javascript">
@@ -106,7 +111,7 @@
 
 
         function toWords(s) {
-          return s.split(' ').map(s => s.trim()).filter(Boolean)
+          return s.toLowerCase().split(' ').map(s => s.trim()).filter(Boolean)
         }
 
         function computeMatch(text) {
