@@ -66,6 +66,21 @@
           }
         }
 
+        function updateListOfNotes() {
+          const oneLiners = state.notes.map(at => at.text.trim().split('\n')[0].trim().slice(0, 40))
+          listOfNotes.innerText = ''
+          let i = -1
+          for (const curr of oneLiners) {
+            ++i
+            const a = document.createElement('a')
+            a.setAttribute('href', `#${i}`)
+            a.textContent = curr || 'EMPTY'
+            const li = document.createElement('li')
+            li.appendChild(a)
+            listOfNotes.appendChild(li)
+          }
+        }
+
         function update(full) {
           const note = state.notes[state.index]
           textArea.setAttribute('dir', note.rtl ? 'RTL' : 'LTR')
@@ -75,9 +90,7 @@
           indicatorCurr.innerText = String(state.index + 1).padStart(numDigits)
           indicatorOutOf.innerText = String(state.notes.length)
 
-          const oneLiners = state.notes.map(at => at.text.trim().split('\n')[0].trim().slice(0, 40))
-          listOfNotes.innerHTML = oneLiners.map((at,i) => `<li><a href="#${i}">${at || '&lt;EMPTY&gt;'}</a></li>`).join('\n')
-
+          updateListOfNotes()
           dirButton.innerHTML = `RTL ${note.rtl ? '&mapstoleft;' : '&RightTeeArrow;'}`
           if (full) {
             textArea.value = note.text
@@ -108,6 +121,7 @@
 
         textArea.addEventListener('input', () => {
           state.notes[state.index].text = textArea.value
+          updateListOfNotes()
         })
 
         function loadState() {
