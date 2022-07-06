@@ -46,8 +46,6 @@
 
   <script type="text/javascript">
     (() => {
-      let dirIsRtl = false
-
       window.onload = () => {
         const dirButton = document.getElementById('dir-button')
         const textArea = document.getElementById('main-textarea')
@@ -69,21 +67,23 @@
         }
 
         function update(full) {
-          textArea.setAttribute('dir', dirIsRtl ? 'RTL' : 'LTR')
+          const note = state.notes[state.index]
+          textArea.setAttribute('dir', note.rtl ? 'RTL' : 'LTR')
           applyClass(prevButton, 'disabled', state.index === 0)
           applyClass(nextButton, 'disabled', state.index === state.notes.length - 1)
           const numDigits = String(state.notes.length).length
           indicatorCurr.innerText = String(state.index + 1).padStart(numDigits)
           indicatorOutOf.innerText = String(state.notes.length)
 
-          dirButton.innerHTML = `RTL ${dirIsRtl ? '&mapstoleft;' : '&RightTeeArrow;'}`
+          dirButton.innerHTML = `RTL ${note.rtl ? '&mapstoleft;' : '&RightTeeArrow;'}`
           if (full) {
-            textArea.value = state.index >= 0 ? state.notes[state.index].text : ''
+            textArea.value = note.text
           }
         }
 
         dirButton.addEventListener("click", () => {
-          dirIsRtl = !dirIsRtl
+          const note = state.notes[state.index]
+          note.rtl = !note.rtl
           update(false)
         })
 
