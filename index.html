@@ -5,7 +5,7 @@
     body {
       font-family: Arial, Helvetica, sans-serif;
       display: grid;
-      grid-template-areas: 
+      grid-template-areas:
         "search bar"
         "side   edit";
       grid-template-columns: 3fr 21fr;
@@ -15,7 +15,7 @@
     }
 
     textarea {
-      font-size: 2em;      
+      font-size: 2em;
     }
 
     .text-box {
@@ -69,8 +69,22 @@
       overflow-x: hidden;
     }
 
-    #main-textarea {
+    #editor-wrapper {
       grid-area: edit;
+      border-radius: 10px;
+      border-style: solid;
+      border-width: 3px;
+      border-color: brown;
+      padding-top: 1em;
+      padding-left: 1em;
+      padding-right: 1em;
+    }
+
+    #main-textarea {
+      width: 100%;
+      height: 100%;
+      border-style: none;
+      resize: none;
     }
 
     .list-of-notes-item {
@@ -78,7 +92,7 @@
       overflow-x: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      margin-bottom: 1em;      
+      margin-bottom: 1em;
     }
 
     #search {
@@ -146,12 +160,12 @@
         }
 
         function updateListOfNotes() {
-          const records = state.notes.map((entry, i) => ({i, entry, rank: computeMatch(entry.text)}))
+          const records = state.notes.map((entry, i) => ({ i, entry, rank: computeMatch(entry.text) }))
           const sorted = records.sort((lhs, rhs) => rhs.rank - lhs.rank)
           const filtered = sorted.filter(curr => curr.rank > 0)
 
 
-          const titles = filtered.map(curr => ({i: curr.i, title: computeTitle(curr.entry.text)}))
+          const titles = filtered.map(curr => ({ i: curr.i, title: computeTitle(curr.entry.text) }))
           const fp = JSON.stringify(titles)
           if (fp === currentListFingerprint) {
             return
@@ -204,7 +218,7 @@
           state.index = Math.max(state.index - 1, 0)
           update(true)
         })
-        
+
         nextButton.addEventListener('click', () => {
           state.index = Math.min(state.index + 1, state.notes.length - 1)
           update(true)
@@ -213,7 +227,7 @@
         purge.addEventListener('click', () => {
           state.notes = state.notes.filter(at => Boolean(at.text.trim()))
           if (!state.notes.length) {
-            state.notes.push({text: '', rtl: false})
+            state.notes.push({ text: '', rtl: false })
           }
           state.index = Math.min(state.index, state.notes.length - 1)
           update(true)
@@ -283,7 +297,9 @@
     <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
     <span id="purge" class="my-button danger">Purge</span>
   </div>
-  <textarea id="main-textarea"></textarea>
+  <span id="editor-wrapper">
+    <textarea id="main-textarea"></textarea>
+  </span>
 </body>
 
 </html>
