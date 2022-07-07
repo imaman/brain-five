@@ -128,20 +128,27 @@
           return foundWords.length / queryWords.length
         }
 
+
+        function computeTitle(text) {
+          return text.trim().split('\n')[0].trim().slice(0, 40)
+        }
+
         function updateListOfNotes() {
-          const records = state.notes.map((entry, i) => ({i, entry, rank: computeMatch(entry.text), oneLiner: entry.text.trim().split('\n')[0].trim().slice(0, 40)}))
+          const records = state.notes.map((entry, i) => ({i, entry, rank: computeMatch(entry.text)}))
           const sorted = records.sort((lhs, rhs) => rhs.rank - lhs.rank)
           const filtered = sorted.filter(curr => curr.rank > 0)
 
-          const fp = JSON.stringify(filtered)
+
+          const titles = filtered.map(curr => ({i: curr.i, title: computeTitle(curr.entry.text)}))
+          const fp = JSON.stringify(titles)
           if (fp === currentListFingerprint) {
             return
           }
           listOfNotes.innerText = ''
-          filtered.forEach(curr => {
+          titles.forEach(curr => {
             const a = document.createElement('a')
-            a.setAttribute('href', `#${curr.i}`)
-            a.textContent = curr.oneLiner || 'EMPTY'
+            a.setAttribute('href', `#${curr.i + 1}`)
+            a.textContent = curr.title || 'EMPTY'
             a.classList.add('list-of-notes-item')
             a.addEventListener('click', () => {
               state.index = curr.i
