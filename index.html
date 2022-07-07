@@ -167,9 +167,28 @@
           const queryWords = toWords(state.query)
           const textWords = new Set(toWords(text))
 
-          const foundWords = queryWords.filter(qw => textWords.has(qw))
+          function score(qw) {
+            if (textWords.has(qw)) {
+              return 1
+            }
 
-          return foundWords.length / queryWords.length
+
+            let s = 0
+            for (const tw of textWords) {
+              if (!tw.includes(qw)) {
+                continue
+              }
+
+              s = Math.max(s, qw.length / tw.length)
+            }
+
+            return s
+          }
+
+          const sum = queryWords.map(qw => score(qw)).reduce((a, b) => a + b, 0)
+          const ret = sum / queryWords.length
+          console.log(`score = ${ret} for "${state.query}" on "${text}"`)
+          return ret
         }
 
 
@@ -192,7 +211,7 @@
           titles.forEach(curr => {
             const a = document.createElement('a')
             a.setAttribute('href', `#${curr.i + 1}`)
-            a.textContent = curr.title || 'EMPTY'
+            a.textContent = curr.title || '🤷'
             a.classList.add('list-of-notes-item')
             a.addEventListener('click', () => {
               state.index = curr.i
