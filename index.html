@@ -5,11 +5,16 @@
     body {
       font-family: Arial, Helvetica, sans-serif;
       display: grid;
-      grid-template-columns: 2fr 10fr;
+      grid-template-areas:
+        "search bar"
+        "side   edit";
+      grid-template-columns: 3fr 21fr;
+      grid-template-rows: min-content;
+      row-gap: 1em;
+      column-gap: 1vw;
     }
 
     textarea {
-      margin-top: 1em;
       font-size: 2em;
     }
 
@@ -54,13 +59,33 @@
       cursor: not-allowed;
     }
 
-    .list-container {
+    #buttons {
+      grid-area: bar;
+    }
+
+    #list-of-notes {
+      grid-area: side;
       overflow: scroll;
       overflow-x: hidden;
     }
 
-    .editor-container {
-      margin-left: 1em;
+    #editor-wrapper {
+      grid-area: edit;
+      border-radius: 10px;
+      border-style: solid;
+      border-width: 3px;
+      border-color: #e7e7e7;
+      padding-top: 1em;
+      padding-left: 1em;
+      padding-right: 1em;
+    }
+
+    #main-textarea {
+      width: 100%;
+      height: 100%;
+      border-style: none;
+      resize: none;
+      outline: none;
     }
 
     .list-of-notes-item {
@@ -68,19 +93,35 @@
       overflow-x: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      margin-top: 1em;      
+      margin-bottom: 1em;
     }
 
-    .search {
-      padding: 1em;
-      border-radius: 5px;
+    #search {
+      grid-area: search;
       font-size: 1em 2em;
-      width: 100%;
-      font-size: 1em;
+      border-radius: 5px;
+      border-width: 2px;
+      border-color: #e7e7e7;
+      background-color: #e7e7e7;
+      border-style: solid;
+      display: grid;
+      grid-template-areas: "input icon";
+      grid-template-columns: 10fr 2fr;
     }
 
     #query-input {
-      height: 2em;
+      margin-left: 1ex;
+      grid-area: input;      
+      border-style: none;
+      border-width: 0px;
+      outline: none;
+      font-size: 1em;
+      background-color: #e7e7e7;
+    }
+
+    #search-icon {
+      grid-area: icon;
+      align-self: center;
     }
   </style>
 
@@ -99,6 +140,9 @@
         const queryInput = document.getElementById('query-input')
         const state = loadState()
 
+
+        queryInput.value = state.query ?? ''
+        textArea.focus()
 
         function applyClass(element, className, doApply) {
           if (doApply) {
@@ -128,20 +172,27 @@
           return foundWords.length / queryWords.length
         }
 
+
+        function computeTitle(text) {
+          return text.trim().split('\n')[0].trim().slice(0, 40)
+        }
+
         function updateListOfNotes() {
-          const records = state.notes.map((entry, i) => ({i, entry, rank: computeMatch(entry.text), oneLiner: entry.text.trim().split('\n')[0].trim().slice(0, 40)}))
+          const records = state.notes.map((entry, i) => ({ i, entry, rank: computeMatch(entry.text) }))
           const sorted = records.sort((lhs, rhs) => rhs.rank - lhs.rank)
           const filtered = sorted.filter(curr => curr.rank > 0)
 
-          const fp = JSON.stringify(filtered)
+
+          const titles = filtered.map(curr => ({ i: curr.i, title: computeTitle(curr.entry.text) }))
+          const fp = JSON.stringify(titles)
           if (fp === currentListFingerprint) {
             return
           }
           listOfNotes.innerText = ''
-          filtered.forEach(curr => {
+          titles.forEach(curr => {
             const a = document.createElement('a')
-            a.setAttribute('href', `#${curr.i}`)
-            a.textContent = curr.oneLiner || 'EMPTY'
+            a.setAttribute('href', `#${curr.i + 1}`)
+            a.textContent = curr.title || 'EMPTY'
             a.classList.add('list-of-notes-item')
             a.addEventListener('click', () => {
               state.index = curr.i
@@ -185,7 +236,7 @@
           state.index = Math.max(state.index - 1, 0)
           update(true)
         })
-        
+
         nextButton.addEventListener('click', () => {
           state.index = Math.min(state.index + 1, state.notes.length - 1)
           update(true)
@@ -194,7 +245,7 @@
         purge.addEventListener('click', () => {
           state.notes = state.notes.filter(at => Boolean(at.text.trim()))
           if (!state.notes.length) {
-            state.notes.push({text: '', rtl: false})
+            state.notes.push({ text: '', rtl: false })
           }
           state.index = Math.min(state.index, state.notes.length - 1)
           update(true)
@@ -248,11 +299,9 @@
 </head>
 
 <body>
-  <div class="list-container">
-    <div class="search"><input type="text" id="query-input">&#x1f50e;</div>
-    <div id="list-of-notes"></div>
-  </div>
-  <div class="editor-container">
+  <span id="search"><input type="text" id="query-input"><span id="search-icon">&#x1f50e;</span></span>
+  <div id="list-of-notes"></div>
+  <div id="buttons">
     <span id="dir-button" class="my-button">RTL</span>
     <span id="new" class="my-button">New</span>
     <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
@@ -265,9 +314,10 @@
     <span id="next" class="my-button">&#x2C3;</span>
     <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
     <span id="purge" class="my-button danger">Purge</span>
-
-    <textarea id="main-textarea" style="width: 100%; height: 90%;"></textarea>
   </div>
+  <span id="editor-wrapper">
+    <textarea id="main-textarea"></textarea>
+  </span>
 </body>
 
 </html>
