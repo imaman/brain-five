@@ -74,7 +74,7 @@
       border-radius: 10px;
       border-style: solid;
       border-width: 3px;
-      border-color: brown;
+      border-color: #e7e7e7;
       padding-top: 1em;
       padding-left: 1em;
       padding-right: 1em;
@@ -85,6 +85,7 @@
       height: 100%;
       border-style: none;
       resize: none;
+      outline: none;
     }
 
     .list-of-notes-item {
@@ -97,16 +98,31 @@
 
     #search {
       grid-area: search;
-      border-radius: 5px;
       font-size: 1em 2em;
+      border-radius: 5px;
       border-width: 2px;
-      border-color: blueviolet;
+      border-color: #e7e7e7;
+      background-color: #e7e7e7;
       border-style: solid;
+      display: grid;
+      grid-template-areas: "input icon";
+      grid-template-columns: 10fr 2fr;
     }
 
     #query-input {
-      height: 2em;
-      /* border-width: 0; */
+      margin-left: 1ex;
+      grid-area: input;      
+      border-style: none;
+      border-width: 0px;
+      outline: none;
+      font-size: 1em;
+      background-color: #e7e7e7;
+      /* height: 2em; */
+    }
+
+    #search-icon {
+      grid-area: icon;
+      align-self: center;
     }
   </style>
 
@@ -281,7 +297,7 @@
 </head>
 
 <body>
-  <div id="search"><input type="text" id="query-input">&#x1f50e;</div>
+  <span id="search"><input type="text" id="query-input"><span id="search-icon">&#x1f50e;</span></span>
   <div id="list-of-notes"></div>
   <div id="buttons">
     <span id="dir-button" class="my-button">RTL</span>
