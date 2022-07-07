@@ -142,6 +142,9 @@
         const state = loadState()
 
 
+        queryInput.value = state.query ?? ''
+        textArea.focus()
+
         function applyClass(element, className, doApply) {
           if (doApply) {
             element.classList.add(className)
