@@ -25,6 +25,7 @@
     }
 
     .my-button {
+      white-space: normal;
       border: none;
       border-radius: 5px;
       color: white;
@@ -247,7 +248,7 @@
           indicatorOutOf.innerText = String(state.notes.length)
 
           updateListOfNotes()
-          dirButton.innerText = `RTL ${note.rtl ? '↤' : '↦'}`
+          dirButton.innerHTML = `RTL ${note.rtl ? '↤' : '↦'}<br>Ctrl+Alt+R`
           if (full) {
             textArea.value = note.text
           }
@@ -315,7 +316,7 @@
           }
 
           const key = event.key
-          if (key === 'd') {
+          if (key === 'r') {
             onDir()
           }
           if (key === 'n') {
@@ -374,18 +375,17 @@
   <span id="search"><input type="text" id="query-input"><span id="search-icon">&#x1f50e;</span></span>
   <div id="list-of-notes"></div>
   <div id="buttons">
-    <span id="dir-button" class="my-button">RTL</span>
-    <span id="new" class="my-button">New</span>
+    <span id="dir-button" class="my-button">RTL<br>Ctrl+Alt+R</span>
+    <span id="new" class="my-button">New<br>Ctrl+Alt+N</span>
     <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
-
-    <span id="prev" class="my-button">&#x2C2;</span>
+    <span id="prev" class="my-button">&#x2C2; Prev<br>Ctrl+Alt+[</span>
     <span class="text-box">
       <span id="indicator-curr" style="text-align:right; white-space:pre"></span>/<span id="indicator-out-of"
         style="text-align:left"></span>
     </span>
-    <span id="next" class="my-button">&#x2C3;</span>
+    <span id="next" class="my-button">Next &#x2C3;<br>Ctrl+Alt+]</span>
     <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
-    <span id="purge" class="my-button danger">Purge</span>
+    <span id="purge" class="my-button danger">Purge<br>&nbsp;</span>
     <span id="selection-status-a"></span><span id="selection-status-b"></span>
   </div>
   <span id="editor-wrapper">
