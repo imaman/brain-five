@@ -1,6 +1,7 @@
 <html>
 
 <head>
+  <title>brain-five</title>
   <style>
     body {
       font-family: Arial, Helvetica, sans-serif;
@@ -24,6 +25,7 @@
     }
 
     .my-button {
+      white-space: normal;
       border: none;
       border-radius: 5px;
       color: white;
@@ -57,6 +59,11 @@
     .disabled {
       opacity: 0.6;
       cursor: not-allowed;
+    }
+
+    #selection-status-a {
+      text-align: right;
+      padding-left: 2em;
     }
 
     #buttons {
@@ -134,6 +141,8 @@
         const prevButton = document.getElementById('prev')
         const nextButton = document.getElementById('next')
         const purge = document.getElementById('purge')
+        const selectionStatusA = document.getElementById('selection-status-a')
+        const selectionStatusB = document.getElementById('selection-status-b')
         const indicatorCurr = document.getElementById('indicator-curr')
         const indicatorOutOf = document.getElementById('indicator-out-of')
         const listOfNotes = document.getElementById('list-of-notes')
@@ -153,6 +162,7 @@
         }
 
         let currentListFingerprint = ''
+        let topMostResult = undefined
 
 
         function toWords(s) {
@@ -187,7 +197,6 @@
 
           const sum = queryWords.map(qw => score(qw)).reduce((a, b) => a + b, 0)
           const ret = sum / queryWords.length
-          console.log(`score = ${ret} for "${state.query}" on "${text}"`)
           return ret
         }
 
@@ -208,6 +217,7 @@
             return
           }
           listOfNotes.innerText = ''
+          topMostResult = titles.find(Boolean)
           titles.forEach(curr => {
             const a = document.createElement('a')
             a.setAttribute('href', `#${curr.i + 1}`)
@@ -222,6 +232,13 @@
           currentListFingerprint = fp
         }
 
+
+        function updateSelectionStatus() {
+          const total = textArea.value.length
+          selectionStatusB.innerText = `${total} characters`
+          const selLen = textArea.selectionEnd - textArea.selectionStart
+          selectionStatusA.innerText = (selLen ? `${selLen}/` : '')
+        }
         function update(full) {
           const note = state.notes[state.index]
           textArea.setAttribute('dir', note.rtl ? 'RTL' : 'LTR')
@@ -232,34 +249,40 @@
           indicatorOutOf.innerText = String(state.notes.length)
 
           updateListOfNotes()
-          dirButton.innerText = `RTL ${note.rtl ? '↤' : '↦'}`
+          dirButton.innerHTML = `RTL ${note.rtl ? '↤' : '↦'}<br>Ctrl+Alt+R`
           if (full) {
             textArea.value = note.text
           }
+          updateSelectionStatus()
         }
 
-        dirButton.addEventListener('click', () => {
+        const onDir = () => {
           const note = state.notes[state.index]
           note.rtl = !note.rtl
           update(false)
-        })
+        }
+        dirButton.addEventListener('click', onDir)
 
-        newButton.addEventListener('click', () => {
+        const onNew = () => {
           state.notes.push({ text: '', rtl: false })
           state.index = state.notes.length - 1
           update(true)
           textArea.focus()
-        })
+        }
+        newButton.addEventListener('click', onNew)
 
-        prevButton.addEventListener('click', () => {
+
+        const onPrev = () => {
           state.index = Math.max(state.index - 1, 0)
           update(true)
-        })
+        }
+        prevButton.addEventListener('click', onPrev)
 
-        nextButton.addEventListener('click', () => {
+        onNext = () => {
           state.index = Math.min(state.index + 1, state.notes.length - 1)
           update(true)
-        })
+        }
+        nextButton.addEventListener('click', onNext)
 
         purge.addEventListener('click', () => {
           state.notes = state.notes.filter(at => Boolean(at.text.trim()))
@@ -276,11 +299,66 @@
           updateListOfNotes()
         })
 
+
+
+        document.addEventListener('selectionchange', event => {
+          const activeElement = document.activeElement
+          if (activeElement !== textArea) {
+            return
+          }
+
+          updateSelectionStatus()
+        })
+
+
+        document.addEventListener('keydown', event => {
+          const key = event.key
+          if (key === 'Escape') {
+
+            if (document.activeElement === textArea) {
+              queryInput.focus()
+            } else {
+              textArea.focus()
+            }
+            return
+          }
+
+          if (!event.altKey || !event.ctrlKey) {
+            return
+          }
+
+          if (key === 'r') {
+            onDir()
+          }
+          if (key === 'n') {
+            onNew()
+          }
+          if (key === '[') {
+            onPrev()
+          }
+          if (key === ']') {
+            onNext()
+          }
+          if (key === '/') {
+            queryInput.focus()
+          }
+        });
+        
         queryInput.addEventListener('input', () => {
           state.query = queryInput.value
           update(false)
         })
 
+        queryInput.addEventListener('keydown', e => {
+          const key = event.key
+          if (key === 'Enter') {
+            if (topMostResult) {
+              state.index = topMostResult.i
+              update(true)
+              textArea.focus()
+            }
+          }
+        })
 
         function loadState() {
           const unparsed = localStorage.getItem('state')
@@ -321,18 +399,18 @@
   <span id="search"><input type="text" id="query-input"><span id="search-icon">&#x1f50e;</span></span>
   <div id="list-of-notes"></div>
   <div id="buttons">
-    <span id="dir-button" class="my-button">RTL</span>
-    <span id="new" class="my-button">New</span>
+    <span id="dir-button" class="my-button">RTL<br>Ctrl+Alt+R</span>
+    <span id="new" class="my-button">New<br>Ctrl+Alt+N</span>
     <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
-
-    <span id="prev" class="my-button">&#x2C2;</span>
+    <span id="prev" class="my-button">Prev<br>Ctrl+Alt+[</span>
     <span class="text-box">
       <span id="indicator-curr" style="text-align:right; white-space:pre"></span>/<span id="indicator-out-of"
         style="text-align:left"></span>
     </span>
-    <span id="next" class="my-button">&#x2C3;</span>
+    <span id="next" class="my-button">Next<br>Ctrl+Alt+]</span>
     <span class="text-box">&nbsp;&nbsp;&nbsp;</span>
-    <span id="purge" class="my-button danger">Purge</span>
+    <span id="purge" class="my-button danger">Purge<br>&nbsp;</span>
+    <span id="selection-status-a"></span><span id="selection-status-b"></span>
   </div>
   <span id="editor-wrapper">
     <textarea id="main-textarea"></textarea>
