@@ -230,6 +230,13 @@
           currentListFingerprint = fp
         }
 
+
+        function updateSelectionStatus() {
+          const total = textArea.value.length
+          selectionStatusB.innerText = `${total} characters`
+          const selLen = textArea.selectionEnd - textArea.selectionStart
+          selectionStatusA.innerText = (selLen ? `${selLen}/` : '')
+        }
         function update(full) {
           const note = state.notes[state.index]
           textArea.setAttribute('dir', note.rtl ? 'RTL' : 'LTR')
@@ -244,30 +251,36 @@
           if (full) {
             textArea.value = note.text
           }
+          updateSelectionStatus()
         }
 
-        dirButton.addEventListener('click', () => {
+        const onDir = () => {
           const note = state.notes[state.index]
           note.rtl = !note.rtl
           update(false)
-        })
+        }
+        dirButton.addEventListener('click', onDir)
 
-        newButton.addEventListener('click', () => {
+        const onNew = () => {
           state.notes.push({ text: '', rtl: false })
           state.index = state.notes.length - 1
           update(true)
           textArea.focus()
-        })
+        }
+        newButton.addEventListener('click', onNew)
 
-        prevButton.addEventListener('click', () => {
+
+        const onPrev = () => {
           state.index = Math.max(state.index - 1, 0)
           update(true)
-        })
+        }
+        prevButton.addEventListener('click', onPrev)
 
-        nextButton.addEventListener('click', () => {
+        onNext = () => {
           state.index = Math.min(state.index + 1, state.notes.length - 1)
           update(true)
-        })
+        }
+        nextButton.addEventListener('click', onNext)
 
         purge.addEventListener('click', () => {
           state.notes = state.notes.filter(at => Boolean(at.text.trim()))
@@ -284,17 +297,37 @@
           updateListOfNotes()
         })
 
+
+
         document.addEventListener('selectionchange', event => {
           const activeElement = document.activeElement
           if (activeElement !== textArea) {
             return
           }
 
-          const total = textArea.value.length
-          selectionStatusB.innerText = `${total} characters`
-          const selLen = textArea.selectionEnd - textArea.selectionStart
-          selectionStatusA.innerText = (selLen ? `${selLen}/` : '')
+          updateSelectionStatus()
         })
+
+
+        document.addEventListener("keydown", event => {
+          if (!event.altKey || !event.ctrlKey) {
+            return
+          }
+
+          const key = event.key
+          if (key === 'd') {
+            onDir()
+          }
+          if (key === 'n') {
+            onNew()
+          }
+          if (key === '[') {
+            onPrev()
+          }
+          if (key === ']') {
+            onNext()
+          }
+        });
         
         queryInput.addEventListener('input', () => {
           state.query = queryInput.value
