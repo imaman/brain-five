@@ -162,6 +162,7 @@
         }
 
         let currentListFingerprint = ''
+        let topMostResult = undefined
 
 
         function toWords(s) {
@@ -216,6 +217,7 @@
             return
           }
           listOfNotes.innerText = ''
+          topMostResult = titles.find(Boolean)
           titles.forEach(curr => {
             const a = document.createElement('a')
             a.setAttribute('href', `#${curr.i + 1}`)
@@ -310,11 +312,21 @@
 
 
         document.addEventListener('keydown', event => {
+          const key = event.key
+          if (key === 'Escape') {
+
+            if (document.activeElement === textArea) {
+              queryInput.focus()
+            } else {
+              textArea.focus()
+            }
+            return
+          }
+
           if (!event.altKey || !event.ctrlKey) {
             return
           }
 
-          const key = event.key
           if (key === 'r') {
             onDir()
           }
@@ -327,7 +339,6 @@
           if (key === ']') {
             onNext()
           }
-
           if (key === '/') {
             queryInput.focus()
           }
@@ -341,7 +352,11 @@
         queryInput.addEventListener('keydown', e => {
           const key = event.key
           if (key === 'Enter') {
-            alert('x')
+            if (topMostResult) {
+              state.index = topMostResult.i
+              update(true)
+              textArea.focus()
+            }
           }
         })
 
