@@ -439,6 +439,11 @@
         }
 
         function storeState() {
+          if (state.viewMode) {
+            // if the app was opened in view mode we do not want it to overwrite changes that were stored in the
+            // meantime.
+            return
+          }
           state.notes[state.index].text = textArea.value
           localStorage.setItem('state', JSON.stringify(state))
         }
