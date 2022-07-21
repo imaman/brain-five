@@ -363,7 +363,8 @@
           const key = event.key
           if (key === 'Escape') {
 
-            if (document.activeElement === textArea) {
+            if (document.activeElement === textArea || state.viewMode) {
+              state.viewMode = false
               queryInput.focus()
             } else {
               textArea.focus()
