@@ -95,6 +95,20 @@
       outline: none;
     }
 
+    #main-textarea.hidden {
+      display: none;
+    }
+
+    #home-page-render {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+    }
+
+    #home-page-render.hidden{
+      display: none;
+    }
+
+
     .list-of-notes-item {
       display: list-item;
       overflow-x: hidden;
@@ -137,6 +151,7 @@
       window.onload = () => {
         const dirButton = document.getElementById('dir-button')
         const textArea = document.getElementById('main-textarea')
+        const homePageRender = document.getElementById('home-page-render')
         const newButton = document.getElementById('new')
         const prevButton = document.getElementById('prev')
         const nextButton = document.getElementById('next')
@@ -147,8 +162,7 @@
         const indicatorOutOf = document.getElementById('indicator-out-of')
         const listOfNotes = document.getElementById('list-of-notes')
         const queryInput = document.getElementById('query-input')
-        const state = loadState()
-
+        const state = loadState(document.location.hash.match(/^#t:(.*)/)?.[1])
 
         queryInput.value = state.query ?? ''
         textArea.focus()
@@ -250,8 +264,42 @@
 
           updateListOfNotes()
           dirButton.innerHTML = `RTL ${note.rtl ? '↤' : '↦'}<br>Ctrl+Alt+R`
+        
+          
+          applyClass(homePageRender, 'hidden', !state.viewMode)
+          applyClass(textArea, 'hidden', state.viewMode)
+
           if (full) {
             textArea.value = note.text
+
+
+            if (state.viewMode) {
+              const lines = note.text.split('\n').map(x => x.trim()).filter(Boolean).slice(1)
+
+              homePageRender.innerText = ''
+              lines.forEach((curr, i) => {
+                const a = document.createElement('a')
+                a.setAttribute('href', curr)
+
+                const d = document.createElement('div')
+                d.setAttribute('style', 'text-align: center;')
+                a.appendChild(d)
+
+                const img = document.createElement('img')
+                img.setAttribute('src', `https://www.google.com/s2/favicons?domain=${curr}&sz=32`)
+                d.appendChild(img)
+
+                const textDiv = document.createElement('div')
+                textDiv.innerText = new URL(curr).host.replace(/^www\./, '').replace(/\.com$/, '')
+                d.appendChild(textDiv)
+
+                homePageRender.appendChild(a)
+
+                if (i === 0) {
+                  a.focus()
+                }
+              })
+            }
           }
           updateSelectionStatus()
         }
@@ -360,7 +408,7 @@
           }
         })
 
-        function loadState() {
+        function loadState(requestedPageTitle) {
           const unparsed = localStorage.getItem('state')
           const defaultState = { version: 2, notes: [{ text: '', rtl: false }], index: 0 }
           if (!unparsed) {
@@ -378,8 +426,14 @@
             delete ret.texts
           }
 
+          const index = ret.notes.map(n => computeTitle(n.text).toLowerCase()).findIndex(x => x === requestedPageTitle?.toLowerCase())
+          if (index >= 0) {
+            ret.index = index
+          }
+
           ret.version = defaultState.version
           ret.query = ret.query ?? ''
+          ret.viewMode = Boolean(requestedPageTitle)
           return ret
         }
 
@@ -414,6 +468,7 @@
   </div>
   <span id="editor-wrapper">
     <textarea id="main-textarea"></textarea>
+    <div id="home-page-render"></div>
   </span>
 </body>
 
