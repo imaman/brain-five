@@ -147,8 +147,7 @@
         const indicatorOutOf = document.getElementById('indicator-out-of')
         const listOfNotes = document.getElementById('list-of-notes')
         const queryInput = document.getElementById('query-input')
-        const state = loadState()
-
+        const state = loadState(document.location.hash.replace(/^#/, ''))
 
         queryInput.value = state.query ?? ''
         textArea.focus()
@@ -360,7 +359,7 @@
           }
         })
 
-        function loadState() {
+        function loadState(requestedPageTitle) {
           const unparsed = localStorage.getItem('state')
           const defaultState = { version: 2, notes: [{ text: '', rtl: false }], index: 0 }
           if (!unparsed) {
@@ -376,6 +375,11 @@
           if (ret.version === 0 && ret.texts) {
             ret.notes = ret.texts.map(at => ({ text: at, rtl: false }))
             delete ret.texts
+          }
+
+          const index = ret.notes.map(n => computeTitle(n.text).toLowerCase()).findIndex(x => x === requestedPageTitle.toLowerCase())
+          if (index >= 0) {
+            ret.index = index
           }
 
           ret.version = defaultState.version
