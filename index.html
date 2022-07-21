@@ -277,7 +277,7 @@
               const lines = note.text.split('\n').map(x => x.trim()).filter(Boolean).slice(1)
 
               homePageRender.innerText = ''
-              lines.forEach(curr => {
+              lines.forEach((curr, i) => {
                 const a = document.createElement('a')
                 a.setAttribute('href', curr)
 
@@ -294,6 +294,10 @@
                 d.appendChild(textDiv)
 
                 homePageRender.appendChild(a)
+
+                if (i === 0) {
+                  a.focus()
+                }
               })
             }
           }
