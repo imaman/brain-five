@@ -95,6 +95,19 @@
       outline: none;
     }
 
+    #main-textarea.hidden {
+      display: none;
+    }
+
+    #home-page-render {
+      display: block;
+    }
+
+    #home-page-render.hidden{
+      display: none;
+    }
+
+
     .list-of-notes-item {
       display: list-item;
       overflow-x: hidden;
@@ -137,6 +150,7 @@
       window.onload = () => {
         const dirButton = document.getElementById('dir-button')
         const textArea = document.getElementById('main-textarea')
+        const homePageRender = document.getElementById('home-page-render')
         const newButton = document.getElementById('new')
         const prevButton = document.getElementById('prev')
         const nextButton = document.getElementById('next')
@@ -147,7 +161,7 @@
         const indicatorOutOf = document.getElementById('indicator-out-of')
         const listOfNotes = document.getElementById('list-of-notes')
         const queryInput = document.getElementById('query-input')
-        const state = loadState(document.location.hash.replace(/^#/, ''))
+        const state = loadState(document.location.hash.match(/^#t:(.*)/)?.[1])
 
         queryInput.value = state.query ?? ''
         textArea.focus()
@@ -249,6 +263,11 @@
 
           updateListOfNotes()
           dirButton.innerHTML = `RTL ${note.rtl ? '↤' : '↦'}<br>Ctrl+Alt+R`
+        
+          
+          applyClass(homePageRender, 'hidden', !state.viewMode)
+          applyClass(textArea, 'hidden', state.viewMode)
+
           if (full) {
             textArea.value = note.text
           }
@@ -377,13 +396,14 @@
             delete ret.texts
           }
 
-          const index = ret.notes.map(n => computeTitle(n.text).toLowerCase()).findIndex(x => x === requestedPageTitle.toLowerCase())
+          const index = ret.notes.map(n => computeTitle(n.text).toLowerCase()).findIndex(x => x === requestedPageTitle?.toLowerCase())
           if (index >= 0) {
             ret.index = index
           }
 
           ret.version = defaultState.version
           ret.query = ret.query ?? ''
+          ret.viewMode = Boolean(requestedPageTitle)
           return ret
         }
 
@@ -418,6 +438,7 @@
   </div>
   <span id="editor-wrapper">
     <textarea id="main-textarea"></textarea>
+    <div id="home-page-render">FOOOOOOOOOOooooooooooooooo</div>
   </span>
 </body>
 
