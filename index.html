@@ -369,7 +369,6 @@
         document.addEventListener('keydown', event => {
           const key = event.key
           if (key === 'Escape') {
-
             if (document.activeElement === textArea || state.viewMode) {
               state.viewMode = false
               queryInput.focus()
@@ -383,19 +382,21 @@
             return
           }
 
-          if (key === 'r') {
+          const code = event.code
+
+          if (code === 'KeyR') {
             onDir()
           }
-          if (key === 'n') {
+          if (code === 'KeyN') {
             onNew()
           }
-          if (key === '[') {
+          if (code === 'BracketLeft') {
             onPrev()
           }
-          if (key === ']') {
+          if (code === 'BracketRight') {
             onNext()
           }
-          if (key === '/') {
+          if (code === 'Slash') {
             queryInput.focus()
           }
         });
